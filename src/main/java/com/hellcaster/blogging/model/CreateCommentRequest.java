@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class CreateCommentRequest {
-    private ObjectId userId;
-    private ObjectId blogId;
+    private String userId;
+    private String blogId;
     private String comment;
 }

@@ -6,6 +6,7 @@ import com.hellcaster.blogging.model.CreateBlogRequest;
 import com.hellcaster.blogging.model.UpdateBlogRequest;
 import com.hellcaster.blogging.repository.BlogRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -35,13 +36,8 @@ public class BlogServiceImpl implements BlogService{
 
     @Override
     public Blog updateBlog(UpdateBlogRequest updateBlogRequest) throws Exception {
-        Blog blog = Blog.builder()
-                        .title(updateBlogRequest.getTitle())
-                        .description(updateBlogRequest.getDescription())
-                        .blogId(updateBlogRequest.getBlogId())
-                        .userId(updateBlogRequest.getUserId())
-                        .publish(updateBlogRequest.getPublish())
-                        .build();
+        Blog blog = blogRepository.findByBlogId(updateBlogRequest.getBlogId());
+        BeanUtils.copyProperties(updateBlogRequest, blog);
         blog.setUpdatedAt(LocalDateTime.now());
         return blogRepository.save(blog);
     }

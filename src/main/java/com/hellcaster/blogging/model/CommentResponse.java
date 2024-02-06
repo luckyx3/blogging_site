@@ -15,9 +15,9 @@ import java.time.LocalDateTime;
 @Builder
 public class CommentResponse {
     @Id
-    private ObjectId commentId;
-    private ObjectId userId;
-    private ObjectId blogId;
+    private String commentId;
+    private String userId;
+    private String blogId;
     private String comment;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
