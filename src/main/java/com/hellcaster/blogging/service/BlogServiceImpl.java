@@ -11,10 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.awt.print.Pageable;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -37,6 +38,9 @@ public class BlogServiceImpl implements BlogService{
     @Override
     public Blog updateBlog(UpdateBlogRequest updateBlogRequest) throws Exception {
         Blog blog = blogRepository.findByBlogId(updateBlogRequest.getBlogId());
+        if(ObjectUtils.isEmpty(blog)){
+            return null;
+        }
         BeanUtils.copyProperties(updateBlogRequest, blog);
         blog.setUpdatedAt(LocalDateTime.now());
         return blogRepository.save(blog);

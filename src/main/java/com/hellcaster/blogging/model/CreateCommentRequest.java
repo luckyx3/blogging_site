@@ -1,5 +1,6 @@
 package com.hellcaster.blogging.model;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +14,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class CreateCommentRequest {
+    @NotBlank(message = "userId cannot be blank")
     private String userId;
+    @NotBlank(message = "blogId cannot be blank")
     private String blogId;
+    @NotBlank(message = "comment cannot be blank")
     private String comment;
 }
