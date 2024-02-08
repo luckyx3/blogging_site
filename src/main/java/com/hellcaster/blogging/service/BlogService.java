@@ -4,11 +4,8 @@ import com.hellcaster.blogging.entity.Blog;
 import com.hellcaster.blogging.model.CommonPaginationRequest;
 import com.hellcaster.blogging.model.CreateBlogRequest;
 import com.hellcaster.blogging.model.UpdateBlogRequest;
-import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
 import java.util.List;
-
 
 public interface BlogService {
     Blog createBlog(CreateBlogRequest createBlogRequest) throws Exception;
