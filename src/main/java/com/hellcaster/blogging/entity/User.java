@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
@@ -16,11 +15,14 @@ import java.time.LocalDateTime;
 @Builder
 public class User {
     @Id
-    private ObjectId userId;
+    private String  userId;
     private String fullName;
-    private String emailId;
+    private String userName;
     private String password;
-    private byte role;
+    private String role;
+    private Integer isSocialRegister;
+    private Integer otp;
+    private Integer isAcountVerify;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -25,4 +25,20 @@ public class GlobalExceptionHandler {
                 .build();
         return new ResponseEntity<>(dbResponseEntity, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(AuthenticationFailedException.class)
+    public ResponseEntity<DBResponseEntity> handelAuthenticationFailedException(AuthenticationFailedException authenticationFailedException){
+        DBResponseEntity dbResponseEntity = DBResponseEntity.builder()
+                .message(authenticationFailedException.getMessage())
+                .data(authenticationFailedException.getErrorCode())
+                .build();
+        return new ResponseEntity<>(dbResponseEntity, HttpStatus.UNAUTHORIZED);
+    }
+    @ExceptionHandler(UserAlreadyRegisterException.class)
+    public ResponseEntity<DBResponseEntity> handelUserAlreadyRegisterException(UserAlreadyRegisterException userAlreadyRegisterException){
+        DBResponseEntity dbResponseEntity = DBResponseEntity.builder()
+                .message(userAlreadyRegisterException.getMessage())
+                .data(userAlreadyRegisterException.getErrorCode())
+                .build();
+        return new ResponseEntity<>(dbResponseEntity, HttpStatus.CONFLICT);
+    }
 }

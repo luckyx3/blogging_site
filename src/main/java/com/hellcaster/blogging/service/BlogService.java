@@ -13,4 +13,6 @@ public interface BlogService {
     Blog deleteBlog(String blogId) throws Exception;
     Blog getBlogById(String blogId) throws Exception;
     List<Blog> getBlogsByUserId(CommonPaginationRequest commonPaginationRequest) throws Exception;
+
+
 }

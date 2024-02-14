@@ -23,7 +23,7 @@ import java.util.*;
 
 @Service
 @Slf4j
-//@CacheConfig(cacheNames = "Blog")
+@CacheConfig(cacheNames = "Blog")
 public class BlogServiceImpl implements BlogService{
     @Autowired
     private BlogRepository blogRepository;
