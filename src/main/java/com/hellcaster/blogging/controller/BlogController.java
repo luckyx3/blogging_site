@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,7 @@ public class BlogController {
     @Autowired
     private BlogService blogService;
     @PostMapping("/v1/create")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<DBResponseEntity> createBlogCall(@Valid @RequestBody CreateBlogRequest createBlogRequest){
         log.info("Create Blog request received: {}", createBlogRequest.toString());
         try {
@@ -42,6 +44,7 @@ public class BlogController {
         }
     }
     @PutMapping("/v1/update")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<DBResponseEntity> updateBlogCall(@Valid @RequestBody UpdateBlogRequest updateBlogRequest){
         log.info("Update Blog request received: {}", updateBlogRequest.toString());
         try {
@@ -65,6 +68,7 @@ public class BlogController {
         }
     }
     @GetMapping("/v1/get/{blogId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public ResponseEntity<DBResponseEntity> getBlogCall(@PathVariable String blogId){
         log.info("Get Blog request received: {}", blogId);
         try {
@@ -79,6 +83,7 @@ public class BlogController {
         }
     }
     @DeleteMapping("/v1/delete/{blogId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<DBResponseEntity> deleteBlogCall(@PathVariable String blogId){
         log.info("Delete Blog request received: {}", blogId);
         try {
@@ -94,6 +99,7 @@ public class BlogController {
     }
 
     @GetMapping("/v1/get_blogs/{userId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public ResponseEntity<DBResponseEntity> getBlogsCall(@RequestParam(defaultValue = "0") Integer pageNo,
                                                          @RequestParam(defaultValue = "10") Integer pageSize,
                                                          @RequestParam(defaultValue = "1") String userId,

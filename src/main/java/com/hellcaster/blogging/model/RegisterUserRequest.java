@@ -1,10 +1,13 @@
 package com.hellcaster.blogging.model;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,8 +20,8 @@ public class RegisterUserRequest {
     private String userName;
     @NotBlank(message = "Password is required")
     private String password;
-    @NotBlank(message = "Role is required")
-    private String role;
+    @NotNull(message = "Role is required")
+    private List<String> role;
 
     @Override
     public String toString() {

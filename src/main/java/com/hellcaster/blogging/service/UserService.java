@@ -3,10 +3,13 @@ package com.hellcaster.blogging.service;
 import com.hellcaster.blogging.entity.User;
 import com.hellcaster.blogging.model.LoginUserRequest;
 import com.hellcaster.blogging.model.RegisterUserRequest;
-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-public interface UserService {
+public interface UserService extends UserDetailsService {
     User registerUser(RegisterUserRequest registerUserRequest);
-    User login(LoginUserRequest loginUserRequest);
-    Boolean verifyEmailId(Integer otp, String userId);
+    User login(LoginUserRequest loginUserRequest) throws  Exception;
+    User verifyEmailId(Integer otp, String userId);
+    UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException;
 }

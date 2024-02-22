@@ -22,6 +22,5 @@ public class CreateBlogRequest {
     private String title;
     @NotBlank(message = "Description can't be blank.")
     private String description;
-    @NotNull(message = "Publish cannot be blank.")
     private Boolean publish;
 }

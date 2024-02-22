@@ -12,7 +12,11 @@ import com.hellcaster.blogging.utils.AppUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -35,11 +39,12 @@ public class UserServiceImpl implements UserService {
         if(!Objects.isNull(u1)){
             throw new UserAlreadyRegisterException("User Already Register", "USER_ALREADY_REGISTER");
         }
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
         User user = User.builder()
                 .userName(registerUserRequest.getUserName())
                 .role(registerUserRequest.getRole())
                 .fullName(registerUserRequest.getFullName())
-                .password(registerUserRequest.getPassword())
+                .password(bCryptPasswordEncoder.encode(registerUserRequest.getPassword()))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .isSocialRegister(0)
@@ -55,21 +60,42 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User login(LoginUserRequest loginUserRequest) {
+    public User login(LoginUserRequest loginUserRequest)  throws  Exception {
         User u1 = userRespository.findByUserName(loginUserRequest.getUserName());
         if(Objects.isNull(u1)){
             throw new RecordNotFoundException("Email Id haven't Registered yet", "USER_NOT_FOUND");
         }
         User user = userRespository.findByUserNameAndPassword(loginUserRequest.getUserName(), loginUserRequest.getPassword());
-        if(Objects.isNull(user)){
+        if(u1.getIsAcountVerify() == 0 && u1.getIsSocialRegister() == 0){
             throw new AuthenticationFailedException("Authentication Failed", "AUTHENTICATION_FAILED");
         }
+        return u1;
+    }
+
+    @Override
+    public User verifyEmailId(Integer otp, String userId) {
+        User user = userRespository.findByUserIdAndOtp(userId, otp);
+        if(Objects.isNull(user)){
+            return null;
+        }
+        user.setIsAcountVerify(1);
+        userRespository.save(user);
         return user;
     }
 
     @Override
-    public Boolean verifyEmailId(Integer otp, String userId) {
-        User user = userRespository.findByUserIdAndOtp(userId, otp);
-        return !Objects.isNull(user);
+    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException{
+        User user = userRespository.findByUserName(userName);
+        if(user == null){
+            log.error("UserService:loadUserByUsername Username not found: " + userName);
+            throw new UsernameNotFoundException("Corresponding User Not Found");
+        }
+        log.info("UserService:loadUserByUsername User found: " + user);
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUserName())
+                .password(user.getPassword())
+                .roles(user.getRole().toArray(new String[0]))
+                .build();
+//        return new UserInfoDetails(user);
     }
 }

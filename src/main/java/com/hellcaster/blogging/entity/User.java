@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document
 @Data
@@ -19,7 +20,7 @@ public class User {
     private String fullName;
     private String userName;
     private String password;
-    private String role;
+    private List<String> role;
     private Integer isSocialRegister;
     private Integer otp;
     private Integer isAcountVerify;

@@ -1,5 +1,6 @@
 package com.hellcaster.blogging.controller;
 
+import com.hellcaster.blogging.config.JwtService;
 import com.hellcaster.blogging.entity.User;
 import com.hellcaster.blogging.exception.AuthenticationFailedException;
 import com.hellcaster.blogging.exception.RecordNotFoundException;
@@ -14,24 +15,30 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 @RestController
 @Slf4j
-@RequestMapping("/user")
 public class UserController {
     @Autowired
     private UserService userService;
+    @Autowired
+    private JwtService jwtService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-    @PutMapping("/v1/register")
+    @PostMapping("v1/register")
     public ResponseEntity<DBResponseEntity> registerCall(@Valid @RequestBody RegisterUserRequest registerUserRequest) {
         log.info("UserController:registerCall Register User request received: {}", registerUserRequest);
         try{
             User user = userService.registerUser(registerUserRequest);
-
-            JwtResponse jwtResponse = new JwtResponse("Verified Token");
+//            JwtResponse jwtResponse = new JwtResponse("Verified Token");
             DBResponseEntity dbResponseEntity = DBResponseEntity.builder()
-                    .data(jwtResponse)
                     .message("User Registered Successfully")
                     .build();
             log.info("User Registered Successfully: {}", user);
@@ -44,17 +51,26 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    @PutMapping("/v1/login")
+    @PutMapping("v1/login")
     public ResponseEntity<DBResponseEntity> loginCall(@Valid @RequestBody LoginUserRequest loginUserRequest) {
         log.info("UserController:loginCall Login User request received: {}", loginUserRequest);
         try {
             User user = userService.login(loginUserRequest);
-            JwtResponse jwtResponse = new JwtResponse("Verified Token");
+            //Authentication while Login
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginUserRequest.getUserName(), loginUserRequest.getPassword()));
+            if(!authentication.isAuthenticated()){
+                throw new AuthenticationFailedException("Password or Email Id is incorrect", "AUTHENTICATION_FAILED");
+            }
+            //Generate JWT Token
+            JwtResponse jwtResponse = new JwtResponse(jwtService.generateToken(user.getUserName()));
+
             DBResponseEntity dbResponseEntity = DBResponseEntity.builder()
                     .data(jwtResponse)
                     .message("User Logged In Successfully")
                     .build();
+
             log.info("User Logged In Successfully: {}", user);
+
             return ResponseEntity.ok(dbResponseEntity);
         }
         catch (RecordNotFoundException ex){
@@ -66,16 +82,18 @@ public class UserController {
             throw ex;
         }
         catch (Exception e) {
-            throw new RuntimeException(e);
+            log.debug("UserController:loginCall something when wrong : {}", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    @GetMapping("/v1/verifyEmailId/{code}")
+    @GetMapping("v1/verifyEmailId/{code}")
     public ResponseEntity<DBResponseEntity<JwtResponse>> verifyEmailIdCall(@PathVariable String code) {
         log.info("UserController:verifyEmailIdCall request received: {}", code);
         try {
             System.out.println(Integer.parseInt(code.substring(0, 4)) + " : " + code.substring(4));
-            if(userService.verifyEmailId(Integer.parseInt(code.substring(0,4)), code.substring(4))){
-                JwtResponse jwtResponse = new JwtResponse("Test Token");
+            User user =  userService.verifyEmailId(Integer.parseInt(code.substring(0,4)), code.substring(4));
+            if(!Objects.isNull(user)){
+                JwtResponse jwtResponse = new JwtResponse(jwtService.generateToken(user.getUserName()));
                 DBResponseEntity dbResponseEntity = DBResponseEntity.builder()
                         .data(jwtResponse)
                         .message("User Verified and Login Successfully")
