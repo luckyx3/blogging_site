@@ -1,4 +1,4 @@
-package com.hellcaster.blogging.model;
+package com.hellcaster.blogging.model.model_user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

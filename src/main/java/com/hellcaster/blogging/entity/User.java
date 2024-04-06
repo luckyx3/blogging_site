@@ -26,4 +26,5 @@ public class User {
     private Integer isAcountVerify;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+//    private List<Token> tokenList;
 }

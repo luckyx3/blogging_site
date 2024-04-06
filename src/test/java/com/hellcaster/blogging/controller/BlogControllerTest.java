@@ -2,7 +2,7 @@ package com.hellcaster.blogging.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hellcaster.blogging.entity.Blog;
-import com.hellcaster.blogging.model.UpdateBlogRequest;
+import com.hellcaster.blogging.model.model_blog.UpdateBlogRequest;
 import com.hellcaster.blogging.service.BlogService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

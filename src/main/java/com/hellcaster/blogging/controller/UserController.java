@@ -7,8 +7,9 @@ import com.hellcaster.blogging.exception.RecordNotFoundException;
 import com.hellcaster.blogging.exception.UserAlreadyRegisterException;
 import com.hellcaster.blogging.model.DBResponseEntity;
 import com.hellcaster.blogging.model.JwtResponse;
-import com.hellcaster.blogging.model.LoginUserRequest;
-import com.hellcaster.blogging.model.RegisterUserRequest;
+import com.hellcaster.blogging.model.model_user.LoginUserRequest;
+import com.hellcaster.blogging.model.model_user.RefreshTokenRequest;
+import com.hellcaster.blogging.model.model_user.RegisterUserRequest;
 import com.hellcaster.blogging.service.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Objects;
 
 @RestController
@@ -37,16 +39,17 @@ public class UserController {
         log.info("UserController:registerCall Register User request received: {}", registerUserRequest);
         try{
             User user = userService.registerUser(registerUserRequest);
-//            JwtResponse jwtResponse = new JwtResponse("Verified Token");
             DBResponseEntity dbResponseEntity = DBResponseEntity.builder()
                     .message("User Registered Successfully")
                     .build();
             log.info("User Registered Successfully: {}", user);
             return ResponseEntity.ok(dbResponseEntity);
-        } catch (UserAlreadyRegisterException e) {
+        }
+        catch (UserAlreadyRegisterException e) {
             log.debug("UserController:registerCall User already present in the System : {}", e);
             throw e;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.debug("UserController:registerCall something when wrong : {}", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -56,13 +59,18 @@ public class UserController {
         log.info("UserController:loginCall Login User request received: {}", loginUserRequest);
         try {
             User user = userService.login(loginUserRequest);
+
             //Authentication while Login
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginUserRequest.getUserName(), loginUserRequest.getPassword()));
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                                                                                    loginUserRequest.getUserName(),
+                                                                                    loginUserRequest.getPassword()));
             if(!authentication.isAuthenticated()){
                 throw new AuthenticationFailedException("Password or Email Id is incorrect", "AUTHENTICATION_FAILED");
             }
-            //Generate JWT Token
-            JwtResponse jwtResponse = new JwtResponse(jwtService.generateToken(user.getUserName()));
+            String jwtToken = jwtService.generateToken(user.getUserName());
+            String refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user.getUserName());
+            //Generate JWT TokenOO
+            JwtResponse jwtResponse = new JwtResponse(jwtToken, refreshToken);
 
             DBResponseEntity dbResponseEntity = DBResponseEntity.builder()
                     .data(jwtResponse)
@@ -86,6 +94,27 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    @PutMapping("v1/refreshToken")
+    public ResponseEntity<DBResponseEntity> refreshTokenCall(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+        log.info("UserController:refreshTokenCall Refresh Token request received: {}", refreshTokenRequest);
+        try {
+            JwtResponse jwtResponse = userService.refreshToken(refreshTokenRequest.getToken());
+            DBResponseEntity dbResponseEntity = DBResponseEntity.builder()
+                    .message("Token Refreshed Successfully")
+                    .data(jwtResponse)
+                    .build();
+            return ResponseEntity.ok(dbResponseEntity);
+        }
+        catch (AuthenticationFailedException ex){
+            log.debug("UserController:refreshTokenCall Authentication Failed : {}", ex);
+            throw ex;
+        }
+        catch (Exception e) {
+            log.debug("UserController:refreshTokenCall something when wrong : {}", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @GetMapping("v1/verifyEmailId/{code}")
     public ResponseEntity<DBResponseEntity<JwtResponse>> verifyEmailIdCall(@PathVariable String code) {
         log.info("UserController:verifyEmailIdCall request received: {}", code);
@@ -93,7 +122,7 @@ public class UserController {
             System.out.println(Integer.parseInt(code.substring(0, 4)) + " : " + code.substring(4));
             User user =  userService.verifyEmailId(Integer.parseInt(code.substring(0,4)), code.substring(4));
             if(!Objects.isNull(user)){
-                JwtResponse jwtResponse = new JwtResponse(jwtService.generateToken(user.getUserName()));
+                JwtResponse jwtResponse = new JwtResponse(jwtService.generateToken(user.getUserName()), jwtService.generateRefreshToken(new HashMap<>(), user.getUserName()));
                 DBResponseEntity dbResponseEntity = DBResponseEntity.builder()
                         .data(jwtResponse)
                         .message("User Verified and Login Successfully")

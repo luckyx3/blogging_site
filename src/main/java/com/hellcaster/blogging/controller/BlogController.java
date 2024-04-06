@@ -3,9 +3,9 @@ package com.hellcaster.blogging.controller;
 import com.hellcaster.blogging.entity.Blog;
 import com.hellcaster.blogging.exception.RecordNotFoundException;
 import com.hellcaster.blogging.model.CommonPaginationRequest;
-import com.hellcaster.blogging.model.CreateBlogRequest;
+import com.hellcaster.blogging.model.model_blog.CreateBlogRequest;
 import com.hellcaster.blogging.model.DBResponseEntity;
-import com.hellcaster.blogging.model.UpdateBlogRequest;
+import com.hellcaster.blogging.model.model_blog.UpdateBlogRequest;
 import com.hellcaster.blogging.service.BlogService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -101,8 +101,8 @@ public class BlogController {
     @GetMapping("/v1/get_blogs/{userId}")
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public ResponseEntity<DBResponseEntity> getBlogsCall(@RequestParam(defaultValue = "0") Integer pageNo,
-                                                         @RequestParam(defaultValue = "10") Integer pageSize,
-                                                         @RequestParam(defaultValue = "1") String userId,
+                                                         @RequestParam(defaultValue = "2") Integer pageSize,
+                                                         @PathVariable("userId") String userId,
                                                          @RequestParam(defaultValue = "id") String sortBy){
         log.info("Get Blogs request received");
         try {

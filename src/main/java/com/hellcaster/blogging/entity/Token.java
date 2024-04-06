@@ -1,24 +1,24 @@
-package com.hellcaster.blogging.model;
+package com.hellcaster.blogging.entity;
 
+import jakarta.annotation.Generated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+@Document
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CommentResponse {
+public class Token {
     @Id
-    private String commentId;
+    private Integer id;
+    private String token;
+    private String refreshToken;
+    private boolean isLoggedOut;
     private String userId;
-    private String blogId;
-    private String comment;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

@@ -2,8 +2,8 @@ package com.hellcaster.blogging.service;
 
 import com.hellcaster.blogging.entity.Blog;
 import com.hellcaster.blogging.model.CommonPaginationRequest;
-import com.hellcaster.blogging.model.CreateBlogRequest;
-import com.hellcaster.blogging.model.UpdateBlogRequest;
+import com.hellcaster.blogging.model.model_blog.CreateBlogRequest;
+import com.hellcaster.blogging.model.model_blog.UpdateBlogRequest;
 
 import java.util.List;
 

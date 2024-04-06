@@ -1,12 +1,14 @@
 package com.hellcaster.blogging.service;
 
 import com.hellcaster.blogging.config.EmailUtils;
+import com.hellcaster.blogging.config.JwtService;
 import com.hellcaster.blogging.entity.User;
 import com.hellcaster.blogging.exception.AuthenticationFailedException;
 import com.hellcaster.blogging.exception.RecordNotFoundException;
 import com.hellcaster.blogging.exception.UserAlreadyRegisterException;
-import com.hellcaster.blogging.model.LoginUserRequest;
-import com.hellcaster.blogging.model.RegisterUserRequest;
+import com.hellcaster.blogging.model.JwtResponse;
+import com.hellcaster.blogging.model.model_user.LoginUserRequest;
+import com.hellcaster.blogging.model.model_user.RegisterUserRequest;
 import com.hellcaster.blogging.repository.UserRespository;
 import com.hellcaster.blogging.utils.AppUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +18,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Objects;
 @Service
 @Slf4j
@@ -33,6 +35,9 @@ public class UserServiceImpl implements UserService {
     private String mailVerificationLink;
     @Autowired
     private AppUtils appUtils;
+    @Autowired
+    private JwtService jwtService;
+
     @Override
     public User registerUser(RegisterUserRequest registerUserRequest){
         User u1 = userRespository.findByUserName(registerUserRequest.getUserName());
@@ -97,5 +102,19 @@ public class UserServiceImpl implements UserService {
                 .roles(user.getRole().toArray(new String[0]))
                 .build();
 //        return new UserInfoDetails(user);
+    }
+
+    @Override
+    public JwtResponse refreshToken(String token) {
+        String userName = jwtService.extractUsername(token);
+        UserDetails userDetails = loadUserByUsername(userName);
+        if(userDetails.getUsername() == null){
+            throw new RecordNotFoundException("User corresponding to this token Not Found", "USER_NOT_FOUND");
+        }
+        if(jwtService.validateToken(token, userDetails)){
+            JwtResponse jwtResponse = new JwtResponse(jwtService.generateToken(userName), token);
+            return jwtResponse;
+        }
+        return null;
     }
 }

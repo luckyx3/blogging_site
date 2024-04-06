@@ -2,8 +2,8 @@ package com.hellcaster.blogging.service;
 
 import com.hellcaster.blogging.entity.Blog;
 import com.hellcaster.blogging.model.CommonPaginationRequest;
-import com.hellcaster.blogging.model.CreateBlogRequest;
-import com.hellcaster.blogging.model.UpdateBlogRequest;
+import com.hellcaster.blogging.model.model_blog.CreateBlogRequest;
+import com.hellcaster.blogging.model.model_blog.UpdateBlogRequest;
 import com.hellcaster.blogging.repository.BlogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -13,11 +13,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -66,9 +66,9 @@ public class BlogServiceImpl implements BlogService{
 
     @Override
     public List<Blog> getBlogsByUserId(CommonPaginationRequest commonPaginationRequest) throws Exception{
-
-        Pageable pageable = (Pageable) PageRequest.of(commonPaginationRequest.getPageNo(), commonPaginationRequest.getPageSize(),
+        Pageable pageable = PageRequest.of(commonPaginationRequest.getPageNo(), commonPaginationRequest.getPageSize(),
                 Sort.by(commonPaginationRequest.getSortBy()).descending());
-        return blogRepository.findByUserId(commonPaginationRequest.getValue(), pageable);
+        List<Blog> blogs = blogRepository.findBlogsByUserId(commonPaginationRequest.getValue(), pageable);
+        return blogs;
     }
 }
